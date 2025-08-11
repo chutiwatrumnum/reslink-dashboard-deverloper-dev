@@ -3,7 +3,7 @@ import { ProjectManageType } from "../../../stores/interfaces/ProjectManage";
 export const projectData: ProjectManageType[] = [
     {
         id: 1,
-        image: "https://www.w3schools.com/tags/img_girl.jpg",
+        image: "",
         projectName: "Project 1",
         licenseStart: "2021-01-01",
         licenseEnd: "2021-01-01",

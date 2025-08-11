@@ -27,8 +27,11 @@ export const ModalNewProject: React.FC<ModalNewProjectType> = ({
     const content = () => {
 
         if (isModalOpen) {
-            return <FormNewProject formObject={formObject} setFormObject={setFormObject}
+            return <FormNewProject 
+                formObject={formObject} 
+                setFormObject={setFormObject} 
                 idProject={idProject}
+                onClose={onClose}
             />
         }
         else {

@@ -1,6 +1,5 @@
 import {
     Table,
-
     Input,
     Button,
     Image,
@@ -44,7 +43,7 @@ const ProjectManageView = () => {
   const [formObject, setFormObject] = useState<ProjectFormObjectType>({
     projectName: "",
     projectType: "Village",
-    imageProject: "https://www.w3schools.com/tags/img_girl.jpg",
+    imageProject: "",
     numbeBuilding:0,
     floor:0,
     lat:"13.7649109",
@@ -243,7 +242,20 @@ const ProjectManageView = () => {
       </div>
     </div>
 
-    <ModalNewProject isOpen={isOpen} onClose={() => setIsOpen(false)} 
+    <ModalNewProject isOpen={isOpen} onClose={() => {
+      setIsOpen(false)
+      setFormObject({
+        projectName: "",
+        projectType: "Village",
+        imageProject: "",
+        numbeBuilding:0,
+        floor:0,
+        lat:"13.7649109",
+        long:"100.5357104",
+        searchGoogleMap:"",
+        id: "",
+      })
+    }} 
       formObject={formObject}
       setFormObject={setFormObject}
       />

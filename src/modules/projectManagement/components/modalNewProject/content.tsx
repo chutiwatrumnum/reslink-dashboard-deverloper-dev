@@ -5,7 +5,7 @@ import type { UploadProps, RcFile } from 'antd/es/upload/interface';
 import imgUpload from "../../../../assets/images/IconImagePhoto.png";
 import ImageCropModal from './ImageCropModal';
 import { ProjectFormObjectType } from "../../../../stores/interfaces/ProjectManage";
-
+import SuccessModal from '../../../../components/common/SuccessModal';
 // CSS to make form items full width
 const formStyles = `.ant-form-item-required {width: 100% !important;}
 /* Hide Google Maps info cards and UI elements */
@@ -40,11 +40,12 @@ iframe[src*="maps.google.com"] .gm-style-iw {
 }`;
 
 export const FormNewProject = (
-    { formObject, setFormObject, idProject }:
+    { formObject, setFormObject, idProject, onClose }:
         {
             formObject: ProjectFormObjectType,
             setFormObject: (formObject: ProjectFormObjectType) => void,
-            idProject: string
+            idProject: string,
+            onClose: () => void
         }) => {
 
     console.log('formObject', formObject);
@@ -244,12 +245,6 @@ export const FormNewProject = (
     };
 
     const handleSave = () => {
-
-
-        // ตรวจสอบว่ามีรูปภาพจริงๆ หรือไม่
-
-
-        // ตรวจสอบว่า validate form ผ่านหรือไม่
         form
             .validateFields()
             .then((values) => {
@@ -257,12 +252,17 @@ export const FormNewProject = (
                 if (!values.image || values.image.trim() === "") {
                     return;
                 }
-                // ถ้าผ่าน
+                // แสดง success message
+                SuccessModal("Success", 1500);
                 console.log('Validate Success:', values);
-                // สามารถดำเนินการต่อ เช่น ส่งข้อมูล หรือปิด modal
+                console.log('Form Object:', formObject);
+                
+                // ปิด modal หลังจาก validation สำเร็จ
+                setTimeout(() => {
+                    onClose();
+                }, 1600); // รอให้ success modal แสดงเสร็จก่อน
             })
             .catch((errorInfo) => {
-                // ถ้าไม่ผ่าน
                 console.log('Validate Failed:', errorInfo);
             });
         if (!formObject.imageProject || formObject.imageProject.trim() === "") {
@@ -423,7 +423,6 @@ export const FormNewProject = (
                         <Form.Item
                             label="Latitude"
                             name="latitude"
-                            rules={[{ required: true, message: 'Please input latitude!' }]}
                             className='!mb-4'
                         >
                             <Input
@@ -439,7 +438,6 @@ export const FormNewProject = (
                         <Form.Item
                             label="Longitude"
                             name="longitude"
-                            rules={[{ required: true, message: 'Please input longitude!' }]}
                             className='!mb-4'
                         >
                             <Input

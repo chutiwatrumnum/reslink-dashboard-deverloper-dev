@@ -16,13 +16,15 @@ import JuristicManage from "./modules/juristicManagement/screens/JuristicManage"
 
 // unauthorized routes
 import SignInScreen from "./modules/main/SignInScreen";
+import DevTeamInvitations from "./modules/developerTeam/screens/DevTeamInvitations";
+import DevTeamList from "./modules/developerTeam/screens/DevTeamList";
+import DevTeamPermission from "./modules/developerTeam/screens/DevTeamPermission";
 // components
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* old legacy routes */}
         {/* unauthorized_route */}
         <Route path="auth" element={<UnauthorizedLayout />}>
@@ -33,7 +35,7 @@ function App() {
         <Route path="dashboard" element={<AuthorizedLayout />}>
           <Route index element={<Navigate to="userManagement" replace />} />
           <Route path="userManagement" element={<ResidentInformationMain />} />
-          
+
           {/* Juristic manage */}
           <Route path="juristicInvitation" element={<JuristicInvitation />} />
           <Route path="juristicManage" element={<JuristicManage />} />
@@ -41,9 +43,18 @@ function App() {
 
           {/* project manage */}
           <Route path="projectManage" element={<ProjectManageView />} />
-
+          {/* Developer Team */}
+          <Route
+            path="developerTeamInvitations"
+            element={<DevTeamInvitations />}
+          />
+          <Route path="developerTeamList" element={<DevTeamList />} />
+          <Route
+            path="developerTeamPermission"
+            element={<DevTeamPermission />}
+          />
         </Route>
-        
+
         <Route path="*" element={<Navigate to="/auth" />} />
       </Routes>
     </BrowserRouter>

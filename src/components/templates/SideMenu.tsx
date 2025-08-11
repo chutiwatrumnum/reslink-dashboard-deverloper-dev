@@ -11,6 +11,10 @@ import {
   UserManagementIcon,
   ResidentManagementIcon,
   ProjectManageIcon,
+  DeveloperTeamIcon,
+  DeveloperTeamInvitationsIcon,
+  DeveloperTeamListIcon,
+  DeveloperTeamPermissionIcon,
 } from "../../assets/icons/Icons";
 
 import MENU_LOGO from "../../assets/images/Logo.png";
@@ -58,11 +62,7 @@ if (typeof document !== "undefined") {
 const { SubMenu } = Menu;
 const main_link = "/dashboard";
 
-const SideMenu = ({
-  onMenuChange,
-}: {
-  onMenuChange: () => void;
-}) => {
+const SideMenu = ({ onMenuChange }: { onMenuChange: () => void }) => {
   const dispatch = useDispatch<Dispatch>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -90,6 +90,10 @@ const SideMenu = ({
         case pathname.includes("/juristicInvitation") ||
           pathname.includes("/juristicManage"):
           return ["managementTeam"];
+        case pathname.includes("developerTeamInvitations") ||
+          pathname.includes("developerTeamList") ||
+          pathname.includes("developerTeamPermission"):
+          return ["developerTeam"];
         default:
           return [];
       }
@@ -108,7 +112,7 @@ const SideMenu = ({
     const handleResize = () => {
       const currentIsLargeScreen = window.innerWidth > 1024;
       setIsLargeScreen(currentIsLargeScreen);
-      
+
       if (!currentIsLargeScreen) {
         // Always collapse on small screens (tablet/mobile)
         setCollapsed(true);
@@ -121,7 +125,7 @@ const SideMenu = ({
 
     window.addEventListener("resize", handleResize);
     handleResize(); // Call once on mount
-    
+
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -193,6 +197,56 @@ const SideMenu = ({
           }}
           onOpenChange={setOpenKeys}
         >
+          <SubMenu
+            key="developerTeam"
+            icon={
+              <DeveloperTeamIcon
+                color={iconMenuColorSelector("developerTeam")}
+                className="sideMenuIcon"
+              />
+            }
+            title="Developer team"
+          >
+            <Menu.Item
+              key={`${main_link}/developerTeamInvitations`}
+              icon={
+                <DeveloperTeamInvitationsIcon
+                  color={iconSubMenuColorSelector("developerTeamInvitations")}
+                  className="sideMenuIcon"
+                />
+              }
+            >
+              <Link to={`${main_link}/developerTeamInvitations`}>
+                Developer team invitations
+              </Link>
+            </Menu.Item>
+            <Menu.Item
+              key={`${main_link}/developerTeamList`}
+              icon={
+                <DeveloperTeamListIcon
+                  color={iconSubMenuColorSelector("developerTeamList")}
+                  className="sideMenuIcon"
+                />
+              }
+            >
+              <Link to={`${main_link}/developerTeamList`}>
+                Developer team list
+              </Link>
+            </Menu.Item>
+            <Menu.Item
+              key={`${main_link}/developerTeamPermission`}
+              icon={
+                <DeveloperTeamPermissionIcon
+                  color={iconSubMenuColorSelector("developerTeamPermission")}
+                  className="sideMenuIcon"
+                />
+              }
+            >
+              <Link to={`${main_link}/developerTeamPermission`}>
+                Developer team permission
+              </Link>
+            </Menu.Item>
+          </SubMenu>
           <Menu.Item
             key={`${main_link}/userManagement`}
             icon={
@@ -224,9 +278,7 @@ const SideMenu = ({
                 />
               }
             >
-              <Link to={`${main_link}/juristicInvitation`}>
-                menu 1
-              </Link>
+              <Link to={`${main_link}/juristicInvitation`}>menu 1</Link>
             </Menu.Item>
 
             <Menu.Item
@@ -238,12 +290,9 @@ const SideMenu = ({
                 />
               }
             >
-              <Link to={`${main_link}/juristicManage`}>
-                menu 2
-              </Link>
+              <Link to={`${main_link}/juristicManage`}>menu 2</Link>
             </Menu.Item>
           </SubMenu>
-
 
           <Menu.Item
             key={`${main_link}/projectManage`}
@@ -256,9 +305,6 @@ const SideMenu = ({
           >
             <Link to={`${main_link}/projectManage`}>Developer News</Link>
           </Menu.Item>
-
-
-
         </Menu>
       </div>
 
