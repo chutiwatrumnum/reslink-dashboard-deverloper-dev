@@ -20,7 +20,7 @@ const APP_VERSION_CODE_PROD = "0.0.1";
 const API_URL_OBJECT = {
   uat: "https://",
   prod: "https://",
-  dev : "https://"
+  dev: "https://reslink-dev-gcf3p.ondigitalocean.app/api/v1.0"
 }
 const MODE_URL = {
   uat: APP_VERSION_CODE_UAT,

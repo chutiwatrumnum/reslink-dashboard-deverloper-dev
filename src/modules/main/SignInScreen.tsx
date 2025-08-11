@@ -1,26 +1,24 @@
-import { Button, Checkbox, Col, Form, Input, Row, Typography } from "antd";
-import { useEffect, useState } from "react";
+// src/modules/main/SignInScreen.tsx
 import {
-  postAuthMutation,
-  postValidateCodeMutation,
-  postJoinMutation,
-} from "../../utils/mutationsGroup/authMutations";
+  Button,
+  Checkbox,
+  Col,
+  Form,
+  Input,
+  Row,
+  Typography,
+  message,
+} from "antd";
+import { useEffect, useState } from "react";
 import LOGO from "../../assets/images/SignInLogo.png";
-import type { AccessTokenType } from "../../stores/interfaces/Auth";
 import "./styles/signIn.css";
-import { getAuthCode, startGoogleLogin } from "../../utils/googleAuth";
-// import { GoogleIcon } from "../../assets/icons/Icons";
 import { Link, useNavigate } from "react-router-dom";
-import SignUpModal from "./components/SignUpModal";
-import ConfirmDetailModal from "./components/ConfirmDetailModal";
-import { JoinPayloadType } from "../../stores/interfaces/Auth";
 import {
   callSuccessModal,
   callFailedModal,
 } from "../../components/common/Modal";
 import { useDispatch, useSelector } from "react-redux";
 import { Dispatch, RootState } from "../../stores";
-import { requiredRule } from "../../utils/formRule";
 
 const { Title } = Typography;
 
@@ -35,87 +33,70 @@ const SignInScreen = () => {
   const dispatch = useDispatch<Dispatch>();
   const navigate = useNavigate();
   const { isAuth } = useSelector((state: RootState) => state.userAuth);
-  const [authCode, setAuthCode] = useState<string>("");
-  const [validateCode, setValidateCode] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
-  // API
-  const postAuth = postAuthMutation();
-  const postValidateCode = postValidateCodeMutation();
-  const postJoin = postJoinMutation();
-
-  // Redirect ถ้า login แล้ว
+  // Redirect if already logged in
   useEffect(() => {
     if (isAuth) {
-      navigate("/dashboard/profile", { replace: true });
+      navigate("/dashboard/userManagement", { replace: true });
     }
   }, [isAuth, navigate]);
 
-  const handleLogin = async () => {
-    startGoogleLogin();
-  };
-
-  const handleGetAccessToken = async () => {
-    if (authCode) {
-      const payload: AccessTokenType = {
-        code: authCode,
-        redirectUrl: window.location.origin + window.location.pathname,
-      };
-      await postAuth.mutateAsync(payload);
-    }
-  };
-
-  // Handle email/password login
+  // Handle Email/Password Login
   const onFinish = async (values: LoginFormData) => {
     setLoading(true);
     try {
+      console.log("🔑 Attempting login...");
+
       const result = await dispatch.userAuth.loginEffects({
         username: values.username,
         password: values.password,
       });
 
       if (result) {
-        // Success message จะแสดงใน loginEffects แล้ว
-        // Navigation จะเกิดขึ้นใน useEffect เมื่อ isAuth เปลี่ยน
+        message.success("Login successful!");
+        // Navigation will happen via useEffect when isAuth changes
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
+      const errorMessage = error?.message || "Login failed. Please try again.";
+      message.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   const onFinishFailed = (errorInfo: any) => {
-    console.log("Failed:", errorInfo);
-    callFailedModal("Please check your input and try again.");
+    console.log("Form validation failed:", errorInfo);
+    message.warning("Please check your input and try again.");
   };
 
-  const onSignUpOk = async (code: string) => {
-    setValidateCode(code);
-    postValidateCode.mutateAsync({ code: code });
-  };
+  // Handle development bypass
+  const handleBypassLogin = async () => {
+    try {
+      setLoading(true);
 
-  const onJoinConfirm = async (payload: JoinPayloadType) => {
-    let newPayload: JoinPayloadType = {
-      code: validateCode,
-      firstName: payload.firstName,
-      middleName: payload.middleName,
-      lastName: payload.lastName,
-      contact: payload.contact,
-    };
-    postJoin.mutateAsync(newPayload).then(() => {
-      callSuccessModal("Registration complete. Please sign in again.");
-    });
-  };
+      // ใช้ fallback mode โดยตรง
+      console.log("🔓 Development bypass login");
 
-  useEffect(() => {
-    // ดึง Auth Code เมื่อมีการ Redirect
-    const code = getAuthCode();
-    if (code && code !== authCode) {
-      setAuthCode(code);
+      const { encryptStorage } = await import("../../utils/encryptStorage");
+      encryptStorage.setItem("access_token", "mock_access_token");
+      encryptStorage.setItem("refreshToken", "mock_refresh_token");
+
+      // เพิ่มข้อมูล developer
+      encryptStorage.setItem("myDeveloperId", "mock_developer_id");
+      encryptStorage.setItem("developerName", "Mock Developer");
+      encryptStorage.setItem("roleName", "Developer Super Admin");
+
+      dispatch.userAuth.updateAuthState(true);
+      message.success("Bypass login successful!");
+    } catch (error) {
+      console.error("Bypass login error:", error);
+      message.error("Bypass login failed");
+    } finally {
+      setLoading(false);
     }
-    handleGetAccessToken();
-  }, [authCode]);
+  };
 
   return (
     <div className="modern-signin-container">
@@ -130,10 +111,14 @@ const SignInScreen = () => {
               </div>
 
               <Title level={2} className="signin-title">
-                Login
+                Welcome Back
               </Title>
+              <p className="text-gray-500 mb-8">
+                Sign in to your developer account
+              </p>
             </div>
 
+            {/* Email/Password Form */}
             <Form
               name="signin"
               form={form}
@@ -143,23 +128,6 @@ const SignInScreen = () => {
               onFinish={onFinish}
               onFinishFailed={onFinishFailed}
               autoComplete="off">
-              {/* Google Sign In Button */}
-              <Button
-                onClick={handleLogin}
-                type="primary"
-                htmlType="button"
-                size="large"
-                block
-                className="login-button-google"
-                style={{ marginBottom: "1rem" }}>
-                {/* <GoogleIcon /> */}
-                <span>เข้าสู่ระบบด้วย Google</span>
-              </Button>
-
-              <div className="signin-divider">
-                <span>Or sign in with email</span>
-              </div>
-
               {/* Email Input */}
               <Form.Item
                 name="username"
@@ -197,7 +165,7 @@ const SignInScreen = () => {
                   </Checkbox>
                 </Form.Item>
 
-                <Link to={"/recovery"} className="forgot-link">
+                <Link to="/recovery" className="forgot-link">
                   Forgot password?
                 </Link>
               </div>
@@ -211,10 +179,20 @@ const SignInScreen = () => {
                   block
                   className="login-button"
                   loading={loading}>
-                  Login
+                  Sign In
                 </Button>
               </Form.Item>
             </Form>
+
+            {/* Development Bypass */}
+            <div className="mt-6 pt-6 border-t border-gray-100">
+              <Button
+                onClick={handleBypassLogin}
+                block
+                className="h-10 border-green-200 text-green-700 hover:border-green-400 hover:text-green-800 bg-green-50 hover:bg-green-100 rounded-lg transition-all duration-200">
+                🔓 Bypass Login (Development)
+              </Button>
+            </div>
           </div>
         </Col>
 
@@ -231,26 +209,19 @@ const SignInScreen = () => {
               <div className="shape shape-6"></div>
             </div>
 
-            {/* Main Text */}
+            {/* Main Content */}
             <div className="main-text">
               <img src={LOGO} alt="Logo Brand" className="logo-brand" />
+              <h1 className="text-4xl font-bold mb-4 text-white">
+                Developer Portal
+              </h1>
+              <p className="text-xl text-blue-100 max-w-md mx-auto">
+                Access your development tools and manage your projects
+              </p>
             </div>
           </div>
         </Col>
       </Row>
-
-      <SignUpModal
-        onOk={onSignUpOk}
-        onClose={() => {
-          console.log("cancel");
-        }}
-      />
-      <ConfirmDetailModal
-        onOk={onJoinConfirm}
-        onClose={() => {
-          console.log("cancel");
-        }}
-      />
     </div>
   );
 };
