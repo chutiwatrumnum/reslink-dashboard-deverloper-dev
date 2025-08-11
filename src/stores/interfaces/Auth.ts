@@ -12,3 +12,11 @@ export interface AuthState {
   isSignUpModalOpen: boolean;
   isConfirmDetailModalOpen: boolean;
 } 
+
+export interface JoinPayloadType {
+  code: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  contact: string;
+}
