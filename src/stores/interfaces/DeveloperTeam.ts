@@ -2,7 +2,7 @@ export interface DeveloperTeamType {
     id: string;
     key?: string;
     userId?: string;
-    name?: string; // เก็บไว้สำหรับ backward compatibility
+    name?: string;
     firstName?: string;
     middleName?: string;
     lastName?: string;
@@ -43,7 +43,7 @@ export interface DeveloperTeamEditPayload {
     familyName: string;
     middleName?: string;
     contact: string;
-    roleId: string | number; // รองรับทั้ง string และ number
+    roleId: string | number;
     image?: string;
 }
 

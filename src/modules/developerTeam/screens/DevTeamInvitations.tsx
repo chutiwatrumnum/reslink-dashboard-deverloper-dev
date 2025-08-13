@@ -87,7 +87,7 @@ const DevTeamInvitations = () => {
 
   const onTabsChange = (key: string) => {
     setIsVerified(key === "verified");
-    setCurPage(1); // Reset to first page when changing tabs
+    setCurPage(1);
   };
 
   // Date picker
@@ -105,10 +105,9 @@ const DevTeamInvitations = () => {
   const { Search } = Input;
   const onSearch = (value: string) => {
     setSearch(value);
-    setCurPage(1); // Reset to first page when searching
+    setCurPage(1);
   };
 
-  // Modal handlers
   const onCreate = () => {
     setOnCreateModalOpen(true);
   };

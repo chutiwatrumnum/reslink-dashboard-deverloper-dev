@@ -11,13 +11,9 @@ import { encryptStorage } from "../../utils/encryptStorage";
 
 const getDeveloperTeamListData = async (params: DeveloperTeamListParams) => {
   let url: string = `/dev-team-management/list?`;
-
-  // สร้าง query string จาก params
   const queryParams = new URLSearchParams();
   queryParams.append("perPage", params.perPage.toString());
   queryParams.append("curPage", params.curPage.toString());
-
-  // เพิ่ม default parameters สำหรับ verified members
   queryParams.append("verifyByJuristic", "true");
   queryParams.append("isActive", "true");
 
@@ -32,7 +28,7 @@ const getDeveloperTeamListData = async (params: DeveloperTeamListParams) => {
   }
   if (params.sort && params.sortBy) {
     queryParams.append("sortBy", params.sortBy);
-    queryParams.append("sort", params.sort.slice(0, -3)); // remove 'end' from 'ascend'/'descend'
+    queryParams.append("sort", params.sort.slice(0, -3));
   }
 
   url = url + queryParams.toString();
@@ -71,8 +67,6 @@ const getDeveloperTeamListData = async (params: DeveloperTeamListParams) => {
       }
     } catch (err: any) {
       console.error("Developer team API error:", err);
-
-      // แสดง error message ที่เหมาะสม
       const errorMessage =
         err.response?.data?.message || "Failed to fetch developer team data";
       message.error(errorMessage);
@@ -159,7 +153,6 @@ export const developerTeam = createModel<RootModel>()({
     },
 
     async refreshData() {
-      // Refresh ข้อมูลโดยใช้ filter ปัจจุบัน
       const currentState = this.getState().developerTeam;
       await dispatch.developerTeam.getTableData(currentState.filterData);
     },

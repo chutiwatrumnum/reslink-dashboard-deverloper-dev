@@ -5,16 +5,12 @@ import {
     DeveloperTeamInvitationsResponse,
     DeveloperTeamListParams,
 } from "../../stores/interfaces/DeveloperTeam";
-
-// Get developer team invitations - ใช้ API endpoint ใหม่
 const getDeveloperTeamInvitations = async ({
     queryKey,
 }: QueryFunctionContext<
     [string, boolean, number, string?]
 >): Promise<DeveloperTeamInvitationsResponse> => {
     const [_key, activate, curPage, search] = queryKey;
-
-    // สร้าง query parameters
     const params = new URLSearchParams();
     params.append("curPage", curPage.toString());
     params.append("perPage", "10"); // default page size
@@ -23,16 +19,12 @@ const getDeveloperTeamInvitations = async ({
     if (search) {
         params.append("search", search);
     }
-
-    // ใช้ API endpoint ใหม่
     const url = `/dev-team-management/invitation/developer/list?${params.toString()}`;
 
     console.log("API URL:", url);
 
     const res = await axios.get(url);
     console.log("API Response:", res.data);
-
-    // รองรับ response format ต่างๆ
     if (res.data?.result) {
         return res.data.result;
     } else if (res.data?.data) {
@@ -41,8 +33,6 @@ const getDeveloperTeamInvitations = async ({
         return res.data;
     }
 };
-
-// Get developer team roles - ใช้ GET /dev-team-management/invitation/developer/role
 const getDeveloperTeamRole = async () => {
     try {
         const url = `/dev-team-management/invitation/developer/role`;
@@ -73,8 +63,6 @@ const getDeveloperTeamRole = async () => {
         return formattedRoles;
     } catch (error: any) {
         console.error("Error fetching developer team roles:", error);
-
-        // Log more details about the error
         if (error.response) {
             console.error("Error Response:", {
                 status: error.response.status,
@@ -96,8 +84,6 @@ const getDeveloperTeamList = async ({
     const queryParams = new URLSearchParams();
     queryParams.append("perPage", params.perPage?.toString() || "10");
     queryParams.append("curPage", params.curPage?.toString() || "1");
-
-    // สำหรับ verified members ใช้ parameters เหล่านี้
     queryParams.append("verifyByJuristic", "true");
     queryParams.append("isActive", "true");
 
@@ -114,8 +100,6 @@ const getDeveloperTeamList = async ({
         queryParams.append("sortBy", params.sortBy);
         queryParams.append("sort", params.sort);
     }
-
-    // ใช้ API endpoint สำหรับ verified team members
     const url = `/dev-team-management/list?${queryParams.toString()}`;
 
     console.log("Fetching developer team list from:", url);
@@ -132,8 +116,6 @@ const getDeveloperTeamList = async ({
         return res.data;
     }
 };
-
-// Query Hooks
 export const getDeveloperTeamRoleQuery = () => {
     return useQuery({
         queryKey: ["developerTeamRole"],

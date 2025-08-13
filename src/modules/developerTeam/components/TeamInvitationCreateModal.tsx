@@ -41,7 +41,6 @@ const TeamInvitationCreateModal = ({
       cancelMessage: "Cancel",
       onOk: async () => {
         if (createMutation) {
-          // ใช้ mutation ที่ส่งมาจาก parent component
           const submitData = {
             ...values,
             roleId: Number(values.roleId), // แปลงเป็น number
@@ -56,11 +55,9 @@ const TeamInvitationCreateModal = ({
             },
             onError: (error: any) => {
               console.error("Create invitation failed:", error);
-              // Error message จะแสดงจาก mutation แล้ว
             },
           });
         } else {
-          // Fallback: ใช้วิธีเก่า
           console.log("Creating invitation with values:", values);
           onOk();
           onRefresh();

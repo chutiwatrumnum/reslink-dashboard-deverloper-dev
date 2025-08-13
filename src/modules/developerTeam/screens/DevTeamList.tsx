@@ -220,7 +220,6 @@ const DevTeamList = () => {
       align: "center",
       sorter: true,
       render: (_, record) => {
-        // ใช้ข้อมูลที่มีจาก API response
         const updateDate =
           record.updatedAt || record.verifiedDate || record.activateDate;
         return (
@@ -266,8 +265,7 @@ const DevTeamList = () => {
       },
     },
   ];
-
-  // Error handling
+  
   if (teamListError) {
     console.error("Team List API Error:", teamListError);
   }
