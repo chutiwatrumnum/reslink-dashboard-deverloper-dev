@@ -1,4 +1,3 @@
-// src/stores/models/UserAuthModel.tsx (ลบ Google OAuth และ modal states)
 import { createModel } from "@rematch/core";
 import { message } from "antd";
 import {
@@ -19,6 +18,8 @@ export const userAuth = createModel<RootModel>()({
     userLastName: "Tao",
     isAuth: false,
     userToken: null,
+    isSignUpModalOpen: false,
+    isConfirmDetailModalOpen: false,
   } as UserType,
   reducers: {
     updateUserIdState: (state, payload) => ({
@@ -37,9 +38,17 @@ export const userAuth = createModel<RootModel>()({
       ...state,
       isAuth: payload,
     }),
+    updateIsSignUpModalOpenState: (state, payload) => ({
+      ...state,
+      isSignUpModalOpen: payload,
+    }),
+    updateIsConfirmDetailModalOpenState: (state, payload) => ({
+      ...state,
+      isConfirmDetailModalOpen: payload,
+    }),
   },
   effects: (dispatch) => ({
-    // แก้ไข loginEffects ให้รองรับทั้ง interface เก่าและใหม่
+    // แก้ไข loginEffects ให้ใช้ API จริงเท่านั้น
     async loginEffects(
       payload: LoginPayloadType | { username: string; password: string }
     ) {
@@ -50,12 +59,11 @@ export const userAuth = createModel<RootModel>()({
             ? { username: payload.username, password: payload.password }
             : { username: payload.username, password: payload.password };
 
-        console.log("🔑 Attempting login with:", {
+        console.log("🔑 Attempting real API login with:", {
           username: loginData.username,
         });
 
-        // เรียก API จริง
-        console.log("🌐 Attempting real API login...");
+        // เรียก API login จริงเท่านั้น
         const userToken = await axios.post("/auth/developer/login", loginData);
 
         if (userToken.status >= 400) {
@@ -63,7 +71,9 @@ export const userAuth = createModel<RootModel>()({
           return false;
         }
 
-        // เก็บ tokens
+        console.log("✅ Login API successful");
+
+        // เก็บ tokens จริง
         encryptStorage.setItem("access_token", userToken.data.access_token);
         if (userToken.data.refreshToken) {
           encryptStorage.setItem("refreshToken", userToken.data.refreshToken);
@@ -71,15 +81,15 @@ export const userAuth = createModel<RootModel>()({
           encryptStorage.setItem("refreshToken", userToken.data.refresh_token);
         }
 
+        // เรียก API เพื่อเช็ค developer ID
         try {
-          // ลองเรียก API เพื่อเช็ค developer ID
           const developerData = await axios.get("/my-developer");
           if (
             developerData.data &&
             developerData.data.data &&
             developerData.data.data.myDeveloperId
           ) {
-            // เก็บ developer information
+            // เก็บ developer information จริง
             encryptStorage.setItem(
               "myDeveloperId",
               developerData.data.data.myDeveloperId
@@ -98,29 +108,32 @@ export const userAuth = createModel<RootModel>()({
               name: developerData.data.data.DeveloperName,
               role: developerData.data.data.roleName,
             });
+          } else {
+            throw new Error("Developer data not found in response");
           }
         } catch (error) {
-          console.log("Developer data API error:", error?.response?.status);
-          // ใช้ default developer ID สำหรับ development
-          encryptStorage.setItem("myDeveloperId", "default_developer_id");
-          encryptStorage.setItem("developerName", "Default Developer");
-          encryptStorage.setItem("roleName", "Developer");
+          console.error(
+            "❌ Developer data API failed:",
+            error?.response?.status
+          );
+          throw new Error("Failed to load developer data");
         }
 
+        // เรียก profile API (ถ้ามี)
         try {
-          // ลองเรียก profile API (ถ้ามี) - เปลี่ยน endpoint
           const userData = await axios.get("/auth/profile");
           if (userData.data && userData.data.result) {
             encryptStorage.setItem("userData", userData.data.result);
           } else if (userData.data) {
             encryptStorage.setItem("userData", userData.data);
           }
+          console.log("✅ Profile data loaded");
         } catch (error) {
           console.log(
-            "Profile API error (404 is normal):",
+            "ℹ️ Profile data not available:",
             error?.response?.status
           );
-          // ไม่ต้องทำอะไร profile data ไม่จำเป็น
+          // Profile data ไม่จำเป็น ไม่ให้ fail
         }
 
         // อัพเดท auth state
@@ -131,34 +144,21 @@ export const userAuth = createModel<RootModel>()({
 
         return true;
       } catch (error) {
-        console.error("Login ERROR:", error);
+        console.error("❌ Login failed:", error);
 
-        // ถ้า API fail แต่ user ใส่ข้อมูลที่ดูเหมือนจริง ให้ลอง fallback
-        const loginData =
-          "username" in payload
-            ? { username: payload.username, password: payload.password }
-            : { username: payload.username, password: payload.password };
+        let errorMessage = "Login failed. Please check your credentials.";
 
-        if (
-          loginData.username.includes("@") &&
-          loginData.password.length >= 6
-        ) {
-          console.log("🔓 API failed, trying fallback login for development");
-
-          encryptStorage.setItem("access_token", "mock_access_token");
-          encryptStorage.setItem("refreshToken", "mock_refresh_token");
-
-          // ใช้ mock developer data
-          encryptStorage.setItem("myDeveloperId", "mock_developer_id");
-          encryptStorage.setItem("developerName", "Mock Developer");
-          encryptStorage.setItem("roleName", "Developer Super Admin");
-
-          dispatch.userAuth.updateAuthState(true);
-          callSuccessModal("Login successful (Development Mode)!");
-          return true;
+        if (error?.response?.status === 401) {
+          errorMessage = "Invalid email or password.";
+        } else if (error?.response?.status === 400) {
+          errorMessage = error?.response?.data?.message || "Invalid request.";
+        } else if (error?.response?.status >= 500) {
+          errorMessage = "Server error. Please try again later.";
+        } else if (error?.message) {
+          errorMessage = error.message;
         }
 
-        FailedModal("Login failed. Please check your credentials.");
+        FailedModal(errorMessage);
         return false;
       }
     },
@@ -194,17 +194,8 @@ export const userAuth = createModel<RootModel>()({
       try {
         const refreshToken = await encryptStorage.getItem("refreshToken");
 
-        if (
-          !refreshToken ||
-          refreshToken === "undefined" ||
-          refreshToken === "mock_refresh_token"
-        ) {
-          console.log("No valid refresh token available or using mock token");
-          // ถ้าเป็น mock token ให้ return true เลย
-          if (refreshToken === "mock_refresh_token") {
-            dispatch.userAuth.updateAuthState(true);
-            return true;
-          }
+        if (!refreshToken || refreshToken === "undefined") {
+          console.error("No refresh token available");
           throw "refresh token not found";
         }
 
@@ -235,8 +226,8 @@ export const userAuth = createModel<RootModel>()({
         return true;
       } catch (error) {
         console.error("Refresh token failed:", error);
-        // ไม่ logout ทันที ให้ user ลอง login ใหม่เอง
-        dispatch.userAuth.updateAuthState(false);
+        // Logout when refresh token fails
+        dispatch.userAuth.onLogout();
         return false;
       }
     },
@@ -248,7 +239,7 @@ export const userAuth = createModel<RootModel>()({
         encryptStorage.removeItem("refreshToken");
         encryptStorage.removeItem("userData");
 
-        // ลบข้อมูล developer
+        // ลบข้อมูล developer ใหม่
         encryptStorage.removeItem("myDeveloperId");
         encryptStorage.removeItem("developerName");
         encryptStorage.removeItem("roleName");

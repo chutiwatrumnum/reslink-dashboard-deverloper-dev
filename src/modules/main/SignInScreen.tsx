@@ -71,33 +71,6 @@ const SignInScreen = () => {
     message.warning("Please check your input and try again.");
   };
 
-  // Handle development bypass
-  const handleBypassLogin = async () => {
-    try {
-      setLoading(true);
-
-      // ใช้ fallback mode โดยตรง
-      console.log("🔓 Development bypass login");
-
-      const { encryptStorage } = await import("../../utils/encryptStorage");
-      encryptStorage.setItem("access_token", "mock_access_token");
-      encryptStorage.setItem("refreshToken", "mock_refresh_token");
-
-      // เพิ่มข้อมูล developer
-      encryptStorage.setItem("myDeveloperId", "mock_developer_id");
-      encryptStorage.setItem("developerName", "Mock Developer");
-      encryptStorage.setItem("roleName", "Developer Super Admin");
-
-      dispatch.userAuth.updateAuthState(true);
-      message.success("Bypass login successful!");
-    } catch (error) {
-      console.error("Bypass login error:", error);
-      message.error("Bypass login failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="modern-signin-container">
       <Row className="modern-signin-row">
@@ -183,16 +156,6 @@ const SignInScreen = () => {
                 </Button>
               </Form.Item>
             </Form>
-
-            {/* Development Bypass */}
-            <div className="mt-6 pt-6 border-t border-gray-100">
-              <Button
-                onClick={handleBypassLogin}
-                block
-                className="h-10 border-green-200 text-green-700 hover:border-green-400 hover:text-green-800 bg-green-50 hover:bg-green-100 rounded-lg transition-all duration-200">
-                🔓 Bypass Login (Development)
-              </Button>
-            </div>
           </div>
         </Col>
 
