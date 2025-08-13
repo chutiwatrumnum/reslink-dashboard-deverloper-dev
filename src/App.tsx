@@ -19,6 +19,8 @@ import SignInScreen from "./modules/main/SignInScreen";
 import DevTeamInvitations from "./modules/developerTeam/screens/DevTeamInvitations";
 import DevTeamList from "./modules/developerTeam/screens/DevTeamList";
 import DevTeamPermission from "./modules/developerTeam/screens/DevTeamPermission";
+import ProjectInvitation from "./modules/projectTeam/screens/ProjectInvitations";
+import ProjectLists from "./modules/projectTeam/screens/ProjectLists";
 // components
 
 function App() {
@@ -36,6 +38,9 @@ function App() {
           <Route index element={<Navigate to="userManagement" replace />} />
           <Route path="userManagement" element={<ResidentInformationMain />} />
 
+          {/* Project Team */}
+          <Route path="projectInvitations" element={<ProjectInvitation />} />
+          <Route path="projectList" element={<ProjectLists />} />
           {/* Juristic manage */}
           <Route path="juristicInvitation" element={<JuristicInvitation />} />
           <Route path="juristicManage" element={<JuristicManage />} />

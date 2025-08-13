@@ -15,6 +15,9 @@ import {
   DeveloperTeamInvitationsIcon,
   DeveloperTeamListIcon,
   DeveloperTeamPermissionIcon,
+  ProjectTeamIcon,
+  ProjectInvitationsIcon,
+  ProjectListIcon,
 } from "../../assets/icons/Icons";
 
 import MENU_LOGO from "../../assets/images/Logo.png";
@@ -94,6 +97,9 @@ const SideMenu = ({ onMenuChange }: { onMenuChange: () => void }) => {
           pathname.includes("developerTeamList") ||
           pathname.includes("developerTeamPermission"):
           return ["developerTeam"];
+        case pathname.includes("/projectInvitations") ||
+          pathname.includes("/projectList"):
+          return ["projectTeam"];
         default:
           return [];
       }
@@ -258,7 +264,6 @@ const SideMenu = ({ onMenuChange }: { onMenuChange: () => void }) => {
           >
             <Link to={`${main_link}/userManagement`}>User Management</Link>
           </Menu.Item>
-
           <SubMenu
             key="managementTeam"
             icon={
@@ -293,7 +298,42 @@ const SideMenu = ({ onMenuChange }: { onMenuChange: () => void }) => {
               <Link to={`${main_link}/juristicManage`}>menu 2</Link>
             </Menu.Item>
           </SubMenu>
-
+          {/* Project Team */}
+          <SubMenu
+            key="projectTeam"
+            icon={
+              <ProjectTeamIcon
+                color={iconMenuColorSelector("projectTeam")}
+                className="sideMenuIcon"
+              />
+            }
+            title="Project Team"
+          >
+            <Menu.Item
+              key={`${main_link}/projectInvitations`}
+              icon={
+                <ProjectInvitationsIcon
+                  color={iconSubMenuColorSelector("projectInvitations")}
+                  className="sideMenuIcon"
+                />
+              }
+            >
+              <Link to={`${main_link}/projectInvitations`}>
+                Project invitation
+              </Link>
+            </Menu.Item>
+            <Menu.Item
+              key={`${main_link}/projectList`}
+              icon={
+                <ProjectListIcon
+                  color={iconSubMenuColorSelector("projectList")}
+                  className="sideMenuIcon"
+                />
+              }
+            >
+              <Link to={`${main_link}/projectLists`}>Project list</Link>
+            </Menu.Item>
+          </SubMenu>
           <Menu.Item
             key={`${main_link}/projectManage`}
             icon={
