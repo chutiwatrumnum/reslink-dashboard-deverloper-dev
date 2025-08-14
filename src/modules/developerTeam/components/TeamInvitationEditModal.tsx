@@ -59,7 +59,7 @@ const TeamInvitationEditModal = ({
           familyName: values.lastName,
           middleName: values.middleName || "",
           contact: values.contact,
-          roleId: Number(values.roleId),
+          roleId: Number(values.roleId), // แปลงเป็น number
         };
 
         console.log(
@@ -80,6 +80,7 @@ const TeamInvitationEditModal = ({
             },
             onError: (error: any) => {
               console.error("Edit invitation failed:", error);
+              // Error message จะแสดงจาก mutation แล้ว
             },
           }
         );
@@ -282,7 +283,7 @@ const TeamInvitationEditModal = ({
                 placeholder="Please input email"
                 maxLength={120}
                 showCount
-                disabled={true}
+                disabled={true} // Usually email is not editable
               />
             </Form.Item>
           </Col>

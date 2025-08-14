@@ -23,7 +23,10 @@ export const postCreateDeveloperTeamMutation = () => {
                 };
 
                 console.log("Creating developer team invitation:", apiPayload);
+
+                // ใช้ API endpoint จริง
                 const response = await axios.post(`/dev-team-management/invitation/developer/create`, apiPayload);
+
                 if (response.status >= 400) {
                     const errorMessage = response.data?.message || response.data?.data?.message || "Request failed";
                     throw new Error(errorMessage);
@@ -46,7 +49,11 @@ export const postCreateDeveloperTeamMutation = () => {
         onSuccess: (data) => {
             console.log("Create success:", data);
             message.success("Invitation created successfully!");
+
+            // Refresh invitation lists
             queryClient.invalidateQueries({ queryKey: ["developerTeamInvitations"] });
+
+            // ถ้ามี QR Code ใน response
             if (data.data?.qrCode || data.data?.data?.qrCode) {
                 console.log("QR Code received:", data.data?.qrCode || data.data?.data?.qrCode);
             }
@@ -58,7 +65,7 @@ export const postCreateDeveloperTeamMutation = () => {
     });
 };
 
-// Edit developer team invitation - ใช้ PUT /dev-team-management/invitation/developer/update
+// Edit developer team invitation - ใช้ PUT /dev-team-management/invitation/developer/update/{id}
 export const useEditDeveloperTeamInvitationMutation = () => {
     const queryClient = useQueryClient();
 
@@ -67,14 +74,16 @@ export const useEditDeveloperTeamInvitationMutation = () => {
         scope: { id: "editDeveloperTeamInvitation" },
         mutationFn: async ({ invitationId, payload }: { invitationId: string; payload: DeveloperTeamEditPayload }) => {
             try {
-                const endpoint = `/dev-team-management/invitation/developer/update`;
+                // ใช้ API endpoint สำหรับ update invitation ตาม documentation
+                const endpoint = `/dev-team-management/invitation/developer/update/${invitationId}`;
+
+                // Request body format ตาม API spec
                 const apiPayload = {
-                    id: invitationId, 
-                    givenName: payload.givenName,
-                    familyName: payload.familyName,
+                    roleId: Number(payload.roleId), // number ตาม spec
+                    firstName: payload.givenName, // ใช้ firstName แทน givenName
                     middleName: payload.middleName || "",
+                    lastName: payload.familyName, // ใช้ lastName แทน familyName
                     contact: payload.contact,
-                    roleId: Number(payload.roleId),
                 };
 
                 console.log("Edit invitation request to:", endpoint, "with payload:", apiPayload);
@@ -120,6 +129,7 @@ export const useEditDeveloperTeamMemberMutation = () => {
         scope: { id: "editDeveloperTeamMember" },
         mutationFn: async ({ userId, payload }: { userId: string; payload: DeveloperTeamEditPayload }) => {
             try {
+                // ใช้ API endpoint สำหรับ update team member
                 const endpoint = `/dev-team-management/${userId}`;
 
                 const apiPayload = {
@@ -127,7 +137,7 @@ export const useEditDeveloperTeamMemberMutation = () => {
                     familyName: payload.familyName,
                     middleName: payload.middleName || "",
                     contact: payload.contact,
-                    roleId: Number(payload.roleId),
+                    roleId: Number(payload.roleId), // แปลงเป็น number
                 };
 
                 console.log("Edit member request to:", endpoint, "with payload:", apiPayload);
@@ -153,6 +163,8 @@ export const useEditDeveloperTeamMemberMutation = () => {
         onSuccess: (data, { userId }) => {
             console.log("Edit member success:", data);
             message.success("Member information updated successfully!");
+
+            // Invalidate member queries
             queryClient.invalidateQueries({ queryKey: ["developerTeamList"] });
             queryClient.invalidateQueries({ queryKey: ["developerTeamProfile", userId] });
         },
@@ -173,6 +185,8 @@ export const useDeleteDeveloperTeamInvitationMutation = () => {
         mutationFn: async (invitationId: string) => {
             try {
                 console.log("Deleting invitation with ID:", invitationId);
+
+                // ใช้ API endpoint สำหรับ delete invitation
                 const endpoint = `/dev-team-management/invitation/developer/delete/${invitationId}`;
 
                 console.log("Delete invitation request to:", endpoint);
@@ -219,6 +233,8 @@ export const useDeleteDeveloperTeamMemberMutation = () => {
         mutationFn: async (userId: string) => {
             try {
                 console.log("Deleting member with ID:", userId);
+
+                // ใช้ API endpoint สำหรับ delete team member
                 const endpoint = `/dev-team-management/${userId}`;
 
                 console.log("Delete member request to:", endpoint);
@@ -244,6 +260,8 @@ export const useDeleteDeveloperTeamMemberMutation = () => {
         onSuccess: (data, userId) => {
             console.log("Delete member success:", data);
             message.success("Member deleted successfully!");
+
+            // Invalidate member queries
             queryClient.invalidateQueries({ queryKey: ["developerTeamList"] });
         },
         onError: (error: any) => {
@@ -263,6 +281,8 @@ export const useResendDeveloperTeamInvitationMutation = () => {
         mutationFn: async (invitationId: string) => {
             try {
                 console.log("Resending developer team invitation for ID:", invitationId);
+
+                // ใช้ API endpoint สำหรับ resend invitation
                 const response = await axios.post(`/dev-team-management/invitation/developer/resend/${invitationId}`);
 
                 if (response.status >= 400) {
@@ -310,8 +330,10 @@ export const useEditDeveloperTeamMutation = () => {
             }
         },
         onSuccess: (data, variables) => {
+            // Success handling จะทำใน individual mutations
         },
         onError: (error: any) => {
+            // Error handling จะทำใน individual mutations
         },
         get isPending() {
             return editInvitationMutation.isPending || editMemberMutation.isPending;
@@ -331,12 +353,15 @@ export const useDeleteDeveloperTeamMutation = () => {
         scope: { id: "deleteDeveloperTeam" },
         mutationFn: async ({ userId, isListDelete = false }: { userId: string; isListDelete?: boolean }) => {
             if (isListDelete) {
+                // สำหรับ verified members
                 return deleteMemberMutation.mutateAsync(userId);
             } else {
+                // สำหรับ invitations
                 return deleteInvitationMutation.mutateAsync(userId);
             }
         },
         onSuccess: (data, variables) => {
+            // Success handling จะทำใน individual mutations
         },
         onError: (error: any) => {
             // Error handling จะทำใน individual mutations

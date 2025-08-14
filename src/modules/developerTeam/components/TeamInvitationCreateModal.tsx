@@ -41,10 +41,17 @@ const TeamInvitationCreateModal = ({
       cancelMessage: "Cancel",
       onOk: async () => {
         if (createMutation) {
+          // แปลงข้อมูลให้ตรงกับ API format
           const submitData = {
-            ...values,
             roleId: Number(values.roleId), // แปลงเป็น number
+            firstName: values.firstName,
+            middleName: values.middleName || "",
+            lastName: values.lastName,
+            contact: values.contact,
+            email: values.email,
           };
+
+          console.log("Submitting create invitation with data:", submitData);
 
           createMutation.mutate(submitData, {
             onSuccess: () => {
@@ -55,9 +62,11 @@ const TeamInvitationCreateModal = ({
             },
             onError: (error: any) => {
               console.error("Create invitation failed:", error);
+              // Error message จะแสดงจาก mutation แล้ว
             },
           });
         } else {
+          // Fallback: ใช้วิธีเก่า
           console.log("Creating invitation with values:", values);
           onOk();
           onRefresh();
